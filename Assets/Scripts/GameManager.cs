@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,19 +11,33 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public GameObject[] drones;
+
+    [Header("HUD")]
     [SerializeField] Button nextButton;
     [SerializeField] Button rotateButton;
     [SerializeField] Button resetButton;
+    [SerializeField] TextMeshProUGUI topText;
+
+    [Header("Objects")]
+    [SerializeField] GameObject missilePrefab;
+    [SerializeField] GameObject enemyMissilePrefab;
+    //[SerializeField] GameObject woodDeck;
 
     private bool setupComplete = false;
     private bool playerTurn = true;
     private int droneIndex = 0;
     private DroneScript drone;
+    public EnemyScript enemyScript;
+    private List<int[]> enemyDrones;
+
+    private int enemyShipCount = 5;
+    private int playerShipCount = 5;
 
     // Start is called before the first frame update
     void Start()
     {
         drone = drones[droneIndex].GetComponent<DroneScript>();
+        enemyDrones = enemyScript.PlaceEnemyDrones();
         nextButton.onClick.AddListener(() => NextDroneClicked());
         rotateButton.onClick.AddListener(() => RotateClicked());
         resetButton.onClick.AddListener(() => ResetClicked());
@@ -33,6 +50,10 @@ public class GameManager : MonoBehaviour
             droneIndex++;
             drone = drones[droneIndex].GetComponent<DroneScript>();
             // drone.flashColor(Color.yellow);
+        }
+        else
+        {
+            enemyScript.PlaceEnemyDrones();
         }
     }
 
@@ -72,5 +93,46 @@ public class GameManager : MonoBehaviour
         drone.ClearTileList();
         Vector3 droneVector = drone.GetOffsetVector(tile.transform.position);
         drones[droneIndex].transform.localPosition = droneVector;
+    }
+
+    public void CheckHit(GameObject tile)
+    {
+        int tileNum = Int32.Parse(Regex.Match(tile.name, @"\d+").Value);
+        int hitCount = 0;
+        foreach(int [] tileNumArray in enemyDrones)
+        {
+            if(tileNumArray.Contains(tileNum))
+            {
+                for (int i = 0; i > tileNumArray.Length; i++)
+                {
+                    if(tileNumArray[i] == tileNum)
+                    {
+                        tileNumArray[i] = -5;
+                        hitCount++;
+                    }
+                    else if(tileNumArray[i] == -5)
+                    {
+                        hitCount++;
+                    }
+                }
+                if (hitCount == tileNumArray.Length)
+                {
+                    enemyShipCount--;
+                    topText.text = "Fallen";
+                }
+                else
+                {
+                    topText.text = "Highlighted";
+                }
+            }
+        }
+        Debug.Log("tileNum");
+        if(hitCount == 0)
+        {
+            topText.text = "Missed";
+            //Invoke("EndPlayerMove", 1.0f)
+            //or
+            //StartCoroutine(EndPlayerMove());
+        }
     }
 }

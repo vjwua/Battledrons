@@ -23,34 +23,46 @@ public class EnemyScript : MonoBehaviour
             while (taken)
             {
                 taken = false;
-                int droneAhead = UnityEngine.Random.Range(0, 99);
+                int droneHead = UnityEngine.Random.Range(0, 99);
                 int rotateBool = UnityEngine.Random.Range(0, 2);
                 int minusAmount = rotateBool == 0 ? 10 : 1;
                 for(int i = 0; i < tileNumArray.Length; i++)
                 {
-                    if (droneAhead - (minusAmount * 1) < 0
-                    || gridNumbers[droneAhead - i * minusAmount] < 0)
+                    //Check that drone end will not go off board and check if tile is taken
+                    if (droneHead - (minusAmount * i) < 0
+                    || gridNumbers[droneHead - i * minusAmount] < 0)
                     {
                         taken = true;
                         break;
                     }
+                    //Drone is horizontal, check drone doesn't go off the sides 0-10, 11-20
                     else if(minusAmount == 1
-                    && droneAhead / 10 != (droneAhead - i * minusAmount) / 10)
+                    && droneHead / 10 != ((droneHead - i * minusAmount) -1) / 10)
                     {
                         taken = true;
                         break;
                     }
                 }
+                //If tile isn't taken, loop through tile numbers assign them to the array in the list
                 if (!taken)
                 {
                     for(int j = 0; j < tileNumArray.Length; j++)
                     {
-                        tileNumArray[j] = gridNumbers[droneAhead - j * minusAmount];
-                        gridNumbers[droneAhead - j * minusAmount] = -1;
+                        tileNumArray[j] = gridNumbers[droneHead - j * minusAmount];
+                        gridNumbers[droneHead - j * minusAmount] = -1;
                     }
                 }
             }
         }
+        /* foreach(int[] numArray in enemyDrones)
+        {
+            string temp = "";
+            for (int i = 0; i < numArray.Length; i++)
+            {
+                temp += ", " + numArray[i];
+            }
+            Debug.Log(temp);
+        } */
         return enemyDrones;
     }
 }
