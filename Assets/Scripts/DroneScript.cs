@@ -10,17 +10,8 @@ public class DroneScript : MonoBehaviour
     [SerializeField] float zOffset = 0;
     float nextYRotation = 90;
     GameObject clickedTile;
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    int hitCount = 0;
+    int droneSize;
 
     public void ClearTileList()
     {
@@ -49,5 +40,16 @@ public class DroneScript : MonoBehaviour
     public void SetClickedTile(GameObject tile)
     {
         clickedTile = tile;
+    }
+
+    public bool OnGameBoard()
+    {
+        return touchTiles.Count == droneSize;
+    }
+
+    public bool HitCheckFallen()
+    {
+        hitCount++;
+        return droneSize <= hitCount;
     }
 }

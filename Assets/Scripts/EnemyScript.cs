@@ -5,6 +5,19 @@ using UnityEngine;
 
 public class EnemyScript : MonoBehaviour
 {
+    char[] guessGrid;
+    List<int> potentialHits;
+    List<int> currentHits;
+    private int guess;
+    [SerializeField] GameObject firePrefab;
+
+    private void Start()
+    {
+        potentialHits = new List<int>();
+        currentHits = new List<int>();
+        guessGrid = Enumerable.Repeat('o', 100).ToArray();
+    }
+
     public List<int[]> PlaceEnemyDrones()
     {
         List<int[]> enemyDrones = new List<int[]>
@@ -64,5 +77,88 @@ public class EnemyScript : MonoBehaviour
             Debug.Log(temp);
         } */
         return enemyDrones;
+    }
+
+    public void NPCTurn()
+    {
+        List<int> hitIndex = new List<int>();
+        for (int i = 0; i < guessGrid.Length; i++)
+        {
+            if (guessGrid[i] == 'h')
+            {
+                hitIndex.Add(i);
+            }
+        }
+        if (hitIndex.Count > 1)
+        {
+            int diff = hitIndex[1] - hitIndex[0];
+            int guessPosition = Random.Range(0, 2) * 2 - 1;
+            int nextIndex = hitIndex[0] + diff;
+            while(guessGrid[nextIndex] != 'o')
+            {
+                if(guessGrid[nextIndex] == 'm'
+                || nextIndex > 100
+                || nextIndex < 0)
+                {
+                    diff *= -1;
+                }
+                nextIndex += diff;
+            }
+            guess = nextIndex;
+        }
+        else if (hitIndex.Count == 1)
+        {
+            List<int> closeTiles = new List<int>();
+            closeTiles.Add(1); //N-S-W-E
+            closeTiles.Add(-1);
+            closeTiles.Add(10);
+            closeTiles.Add(-10);
+            int index, possibleGuess;
+            bool onGrid;
+            TileGuess(hitIndex, closeTiles, out index, out possibleGuess, out onGrid);
+            while ((!onGrid || guessGrid[possibleGuess] != 'o') && closeTiles.Count > 0)
+            {
+                closeTiles.RemoveAt(index);
+                TileGuess(hitIndex, closeTiles, out index, out possibleGuess, out onGrid);
+            }
+            guess = possibleGuess;
+        }
+        else
+        {
+            int nextIndex = Random.Range(0, 100);
+            while(guessGrid[nextIndex] != 'o')
+            {
+                nextIndex = Random.Range(0, 100);
+            }
+            guess = nextIndex;
+        }
+        GameObject tile = GameObject.Find($"({guess / 10}, {guess % 10})");
+        guessGrid[guess] = 'm';
+        Vector3 tileVector = tile.transform.position;
+        tile.GetComponent<Rigidbody>().isKinematic = false;
+        GameObject missile = Instantiate(firePrefab, tileVector, Quaternion.identity);
+    }
+
+    private static void TileGuess(List<int> hitIndex, List<int> closeTiles, out int index, out int possibleGuess, out bool onGrid)
+    {
+        index = Random.Range(0, closeTiles.Count);
+        possibleGuess = hitIndex[0] + closeTiles[index];
+        onGrid = possibleGuess > -1 && possibleGuess < 100;
+    }
+
+    public void MissileHit(int hit)
+    {
+        guessGrid[guess] = 'h';
+    }
+
+    public void FallenPlayer()
+    {
+        for (int i = 0; i < guessGrid.Length; i++)
+        {
+            if (guessGrid[i] == 'h')
+            {
+                guessGrid[i] = 'x';
+            }
+        }
     }
 }

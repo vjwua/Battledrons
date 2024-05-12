@@ -18,11 +18,16 @@ public class EnemyMissileScript : MonoBehaviour
     private void OnCollisionEnter(Collision other) {
         if(other.gameObject.CompareTag("Drone"))
         {
-
+            gameManager.EnemyHitPlayer(targetTileLocation, targetTile, other.gameObject);
         }
         else
         {
-            
+
         }
+    }
+
+    public void SetTarget(int target)
+    {
+        targetTile = target;
     }
 }

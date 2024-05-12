@@ -16,11 +16,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] Button nextButton;
     [SerializeField] Button rotateButton;
     [SerializeField] Button resetButton;
-    [SerializeField] TextMeshProUGUI topText;
+    [SerializeField] TextMeshProUGUI topDroneText;
+    [SerializeField] TextMeshProUGUI playerDroneText;
+    [SerializeField] TextMeshProUGUI enemyText;
 
     [Header("Objects")]
     [SerializeField] GameObject missilePrefab;
     [SerializeField] GameObject enemyMissilePrefab;
+    [SerializeField] GameObject firePrefab;
     //[SerializeField] GameObject woodDeck;
 
     private bool setupComplete = false;
@@ -29,9 +32,10 @@ public class GameManager : MonoBehaviour
     private DroneScript drone;
     public EnemyScript enemyScript;
     private List<int[]> enemyDrones;
+    private List<GameObject> playerFires;
 
-    private int enemyShipCount = 5;
-    private int playerShipCount = 5;
+    private int enemyDroneCount = 5;
+    private int playerDroneCount = 5;
 
     // Start is called before the first frame update
     void Start()
@@ -117,22 +121,38 @@ public class GameManager : MonoBehaviour
                 }
                 if (hitCount == tileNumArray.Length)
                 {
-                    enemyShipCount--;
-                    topText.text = "Fallen";
+                    enemyDroneCount--;
+                    topDroneText.text = "Fallen";
                 }
                 else
                 {
-                    topText.text = "Highlighted";
+                    topDroneText.text = "Highlighted";
                 }
             }
         }
         Debug.Log("tileNum");
         if(hitCount == 0)
         {
-            topText.text = "Missed";
+            topDroneText.text = "Missed";
             //Invoke("EndPlayerMove", 1.0f)
             //or
             //StartCoroutine(EndPlayerMove());
         }
+    }
+
+    public void EnemyHitPlayer(Vector3 tile, int tileNum, GameObject gameObject)
+    {
+        enemyScript.MissileHit(tileNum);
+        gameObject.GetComponent<Rigidbody>().isKinematic = false;
+        playerFires.Add(Instantiate(firePrefab, tile, Quaternion.identity));
+        if (gameObject.GetComponent<DroneScript>().HitCheckFallen())
+        {
+            playerDroneCount--;
+            playerDroneText.text = playerDroneCount.ToString();
+            enemyScript.FallenPlayer();
+        }
+        //Invoke("EndEnemyMove", 2.0f)
+        //or
+        //StartCoroutine(EndEnemyMove());
     }
 }
