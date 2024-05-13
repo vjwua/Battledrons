@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     private DroneScript drone;
     private List<int[]> enemyDrones;
     private int droneIndex = 0;
-    private List<TileManager> allTileManager;
+    [SerializeField] List<TileManager> allTileManager;
 
     [Header("HUD")]
     [SerializeField] Button nextButton;
@@ -196,9 +196,10 @@ public class GameManager : MonoBehaviour
             fire.SetActive(false);
         }
         enemyDroneText.text = enemyDroneCount.ToString();
+        topDroneText.text = "Enemy's move";
         enemyScript.NPCTurn();
         ColorAllTiles(0);
-        if (playerDroneCount < 1) GameOver("You win!");
+        if (playerDroneCount < 1) GameOver("The enemy wins!");
     }
 
     public void EndEnemyMove()
@@ -216,9 +217,10 @@ public class GameManager : MonoBehaviour
             fire.SetActive(true);
         }
         playerDroneText.text = playerDroneCount.ToString();
-        enemyScript.NPCTurn();
+        topDroneText.text = "Choose a tile to strike";
+        playerTurn = true;
         ColorAllTiles(0);
-        if (enemyDroneCount < 1) GameOver("The enemy wins!");
+        if (enemyDroneCount < 1) GameOver("You win!");
     }
 
     private void ColorAllTiles(int colorIndex)

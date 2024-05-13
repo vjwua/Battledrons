@@ -77,6 +77,10 @@ public class EnemyScript : MonoBehaviour
             }
             Debug.Log(temp);
         } */
+        foreach (var x in enemyDrones)
+        {
+            Debug.Log($"x: {x[0]}");
+        }
         return enemyDrones;
     }
 
@@ -132,6 +136,11 @@ public class EnemyScript : MonoBehaviour
                 nextIndex = Random.Range(0, 100);
             }
             guess = nextIndex;
+            nextIndex = GuessAgainCheck(nextIndex);
+            Debug.Log(" --- ");
+            nextIndex = GuessAgainCheck(nextIndex);
+            Debug.Log(" -########-- ");
+            guess = nextIndex;
         }
         GameObject tile = GameObject.Find($"({guess / 10}, {guess % 10})");
         guessGrid[guess] = 'm';
@@ -145,6 +154,22 @@ public class EnemyScript : MonoBehaviour
         index = Random.Range(0, closeTiles.Count);
         possibleGuess = hitIndex[0] + closeTiles[index];
         onGrid = possibleGuess > -1 && possibleGuess < 100;
+    }
+
+    private int GuessAgainCheck(int nextIndex)
+    {
+        string str = "nx: " + nextIndex;
+        int newGuess = nextIndex;
+        bool edgeCase = nextIndex < 10 || nextIndex > 89 || nextIndex % 10 == 0 || nextIndex % 10 == 9;
+        bool nearGuess = false;
+        if (nextIndex + 1 < 100) nearGuess = guessGrid[nextIndex + 1] != 'o';
+        if (!nearGuess && nextIndex - 1 > 0) nearGuess = guessGrid[nextIndex - 1] != 'o';
+        if (!nearGuess && nextIndex + 10 < 100) nearGuess = guessGrid[nextIndex + 10] != 'o';
+        if (!nearGuess && nextIndex - 10 > 0) nearGuess = guessGrid[nextIndex - 10] != 'o';
+        if (edgeCase || nearGuess) newGuess = Random.Range(0, 100);
+        while (guessGrid[newGuess] != 'o') newGuess = Random.Range(0, 100);
+        Debug.Log(str + " newGuess: " + newGuess + " e:" + edgeCase + " g:" + nearGuess);
+        return newGuess;
     }
 
     public void MissileHit(int hit)
