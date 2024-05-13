@@ -45,7 +45,7 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    void SetTileColor(int index, Color32 color)
+    public void SetTileColor(int index, Color32 color)
     {
         hitColor[index] = color;
     }

@@ -10,6 +10,7 @@ public class EnemyScript : MonoBehaviour
     List<int> currentHits;
     private int guess;
     [SerializeField] GameObject firePrefab;
+    public GameManager gameManager;
 
     private void Start()
     {
@@ -149,6 +150,7 @@ public class EnemyScript : MonoBehaviour
     public void MissileHit(int hit)
     {
         guessGrid[guess] = 'h';
+        Invoke(nameof(EndTurn), 1.0f);
     }
 
     public void FallenPlayer()
@@ -160,5 +162,28 @@ public class EnemyScript : MonoBehaviour
                 guessGrid[i] = 'x';
             }
         }
+    }
+
+    private void EndTurn()
+    {
+        gameManager.GetComponent<GameManager>().EndEnemyMove();
+    }
+
+    public void PauseAndEnd(int miss)
+    {
+        if(currentHits.Count > 0 && currentHits[0] > miss)
+        {
+            foreach(int potential in potentialHits)
+            {
+                if(currentHits[0] > miss)
+                {
+                    if (potential < miss) potentialHits.Remove(potential);
+                } else
+                {
+                    if (potential > miss) potentialHits.Remove(potential);
+                }
+            }
+        }
+        Invoke("EndTurn", 1.0f);
     }
 }

@@ -5,13 +5,35 @@ using UnityEngine;
 
 public class DroneScript : MonoBehaviour
 {
-    List<GameObject> touchTiles = new List<GameObject>();
     [SerializeField] float xOffset = 0;
     [SerializeField] float zOffset = 0;
     float nextYRotation = 90;
     GameObject clickedTile;
     int hitCount = 0;
-    int droneSize;
+    public int droneSize;
+
+    private Material[] allMaterials;
+
+    List<GameObject> touchTiles = new List<GameObject>();
+    List<Color> allColors = new List<Color>();
+
+    private void Start()
+    {
+        allMaterials = GetComponentInChildren<Renderer>().materials;
+        for (int i = 0; i < allMaterials.Length; i++)
+        {
+            allColors.Add(allMaterials[i].color);
+        }
+    }
+    
+    private void OnTriggerEnter(Collider other) {
+        //transform.parent.GetComponent<TestScript>().CollisionDetected(this);
+        Debug.Log($"{other.gameObject.name} and {other.gameObject.transform.parent.name}");
+        if(other.gameObject.CompareTag("Tile"))
+        {
+            touchTiles.Add(other.gameObject);
+        }
+    }
 
     public void ClearTileList()
     {
@@ -25,6 +47,7 @@ public class DroneScript : MonoBehaviour
 
     public void RotateClicked()
     {
+        if (clickedTile == null) { return; }
         ClearTileList();
         transform.eulerAngles += new Vector3(0, nextYRotation, 0);
         nextYRotation *= -1;
@@ -34,6 +57,7 @@ public class DroneScript : MonoBehaviour
 
     public void SetPosition(Vector3 newVector)
     {
+        ClearTileList();
         transform.localPosition = new Vector3(newVector.x + xOffset, 2, newVector.z + zOffset);
     }
 
@@ -51,5 +75,23 @@ public class DroneScript : MonoBehaviour
     {
         hitCount++;
         return droneSize <= hitCount;
+    }
+
+    public void FlashColor(Color tempColor)
+    {
+        foreach (Material material in allMaterials)
+        {
+            material.color = tempColor;
+        }
+        Invoke(nameof(ResetColor), 0.5f);
+    }
+
+    public void ResetColor()
+    {
+        int i = 0;
+        foreach (Material material in allMaterials)
+        {
+            material.color = allColors[i++];
+        }
     }
 }

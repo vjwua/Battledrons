@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Missile
   - EnemyMissile
+  - Tile
+  - Undefined
+  - Drone
   layers:
   - Default
   - TransparentFX

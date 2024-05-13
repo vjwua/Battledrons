@@ -10,7 +10,13 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Drones")]
     public GameObject[] drones;
+    public EnemyScript enemyScript;
+    private DroneScript drone;
+    private List<int[]> enemyDrones;
+    private int droneIndex = 0;
+    private List<TileManager> allTileManager;
 
     [Header("HUD")]
     [SerializeField] Button nextButton;
@@ -18,21 +24,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] Button resetButton;
     [SerializeField] TextMeshProUGUI topDroneText;
     [SerializeField] TextMeshProUGUI playerDroneText;
-    [SerializeField] TextMeshProUGUI enemyText;
+    [SerializeField] TextMeshProUGUI enemyDroneText;
 
     [Header("Objects")]
     [SerializeField] GameObject missilePrefab;
     [SerializeField] GameObject enemyMissilePrefab;
     [SerializeField] GameObject firePrefab;
-    //[SerializeField] GameObject woodDeck;
 
     private bool setupComplete = false;
     private bool playerTurn = true;
-    private int droneIndex = 0;
-    private DroneScript drone;
-    public EnemyScript enemyScript;
-    private List<int[]> enemyDrones;
-    private List<GameObject> playerFires;
+    private List<GameObject> playerFires = new List<GameObject>();
+    private List<GameObject> enemyFires = new List<GameObject>();
 
     private int enemyDroneCount = 5;
     private int playerDroneCount = 5;
@@ -49,15 +51,30 @@ public class GameManager : MonoBehaviour
 
     void NextDroneClicked()
     {
-        if (droneIndex <= drones.Length - 2)
+        if (!drone.OnGameBoard())
         {
-            droneIndex++;
-            drone = drones[droneIndex].GetComponent<DroneScript>();
-            // drone.flashColor(Color.yellow);
+            drone.FlashColor(Color.red);
         }
         else
         {
-            enemyScript.PlaceEnemyDrones();
+            if (droneIndex <= drones.Length - 2)
+            {
+                droneIndex++;
+                drone = drones[droneIndex].GetComponent<DroneScript>();
+                drone.FlashColor(Color.yellow);
+            }
+            else
+            {
+                nextButton.gameObject.SetActive(false);
+                rotateButton.gameObject.SetActive(false);
+                resetButton.gameObject.SetActive(false);
+                topDroneText.text = "Choose a tile to strike";
+                setupComplete = true;
+                for (int i = 0; i < drones.Length; i++)
+                {
+                    drones[i].SetActive(false);
+                }
+            }
         }
     }
 
@@ -82,7 +99,12 @@ public class GameManager : MonoBehaviour
     {
         if (setupComplete && playerTurn)
         {
-            //TODO: Missile attack
+            ParticleSystem laserParticle = missilePrefab.GetComponentInChildren<ParticleSystem>();
+            Vector3 tilePosition = tile.transform.position;
+            tilePosition.y += 25;
+            playerTurn = false;
+            missilePrefab.transform.position = tilePosition;
+            laserParticle.Play();
         }
         else if (!setupComplete)
         {
@@ -123,21 +145,26 @@ public class GameManager : MonoBehaviour
                 {
                     enemyDroneCount--;
                     topDroneText.text = "Fallen";
+                    enemyFires.Add(Instantiate(firePrefab, tile.transform.position, Quaternion.identity));
+                    tile.GetComponent<TileManager>().SetTileColor(1, new Color32(68, 0, 0, 255));
+                    tile.GetComponent<TileManager>().SwitchColors(1);
                 }
                 else
                 {
                     topDroneText.text = "Highlighted";
+                    tile.GetComponent<TileManager>().SetTileColor(1, new Color32(255, 0, 0, 255));
+                    tile.GetComponent<TileManager>().SwitchColors(1);
                 }
             }
         }
         Debug.Log("tileNum");
         if(hitCount == 0)
         {
+            tile.GetComponent<TileManager>().SetTileColor(1, new Color32(38, 57, 76, 255));
+            tile.GetComponent<TileManager>().SwitchColors(1);
             topDroneText.text = "Missed";
-            //Invoke("EndPlayerMove", 1.0f)
-            //or
-            //StartCoroutine(EndPlayerMove());
         }
+        Invoke(nameof(EndPlayerMove), 2.0f);
     }
 
     public void EnemyHitPlayer(Vector3 tile, int tileNum, GameObject gameObject)
@@ -151,8 +178,60 @@ public class GameManager : MonoBehaviour
             playerDroneText.text = playerDroneCount.ToString();
             enemyScript.FallenPlayer();
         }
-        //Invoke("EndEnemyMove", 2.0f)
-        //or
-        //StartCoroutine(EndEnemyMove());
+        Invoke(nameof(EndEnemyMove), 2.0f);
+    }
+
+    private void EndPlayerMove()
+    {
+        for (int i = 0; i < drones.Length; i++)
+        {
+            drones[i].SetActive(true);
+        }
+        foreach (GameObject fire in playerFires)
+        {
+            fire.SetActive(true);
+        }
+        foreach (GameObject fire in enemyFires)
+        {
+            fire.SetActive(false);
+        }
+        enemyDroneText.text = enemyDroneCount.ToString();
+        enemyScript.NPCTurn();
+        ColorAllTiles(0);
+        if (playerDroneCount < 1) GameOver("You win!");
+    }
+
+    public void EndEnemyMove()
+    {
+        for (int i = 0; i < drones.Length; i++)
+        {
+            drones[i].SetActive(false);
+        }
+        foreach (GameObject fire in playerFires)
+        {
+            fire.SetActive(false);
+        }
+        foreach (GameObject fire in enemyFires)
+        {
+            fire.SetActive(true);
+        }
+        playerDroneText.text = playerDroneCount.ToString();
+        enemyScript.NPCTurn();
+        ColorAllTiles(0);
+        if (enemyDroneCount < 1) GameOver("The enemy wins!");
+    }
+
+    private void ColorAllTiles(int colorIndex)
+    {
+        foreach (TileManager tileManager in allTileManager)
+        {
+            tileManager.SwitchColors(colorIndex);
+        }
+    }
+
+    void GameOver(string winner)
+    {
+        topDroneText.text = "Game over" + winner;
+        resetButton.gameObject.SetActive(true);
     }
 }

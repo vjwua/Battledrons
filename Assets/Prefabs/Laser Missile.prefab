@@ -566,8 +566,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1706859230132529336, guid: 6906e371ec97242adbdcdebd3397b596, type: 3}
+      propertyPath: TrailModule.lifetime.scalar
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1706859230132529336, guid: 6906e371ec97242adbdcdebd3397b596, type: 3}
       propertyPath: TrailModule.widthOverTrail.scalar
-      value: 2
+      value: 2.33
       objectReference: {fileID: 0}
     - target: {fileID: 3604419762848172779, guid: 6906e371ec97242adbdcdebd3397b596, type: 3}
       propertyPath: m_RootOrder

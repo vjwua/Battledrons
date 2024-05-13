@@ -22,7 +22,7 @@ public class EnemyMissileScript : MonoBehaviour
         }
         else
         {
-
+            enemyScript.PauseAndEnd(targetTile);
         }
     }
 

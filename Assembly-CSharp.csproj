@@ -37,12 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets/Scripts/CoordinateLabeler.cs" />
-     <Compile Include="Assets/Scripts/TileManager.cs" />
-     <Compile Include="Assets/Scripts/GameManager.cs" />
      <Compile Include="Assets/Scripts/DroneScript.cs" />
-     <Compile Include="Assets/Scripts/EnemyScript.cs" />
+     <Compile Include="Assets/Scripts/TileManager.cs" />
      <Compile Include="Assets/Scripts/MissileScript.cs" />
+     <Compile Include="Assets/Scripts/GameManager.cs" />
+     <Compile Include="Assets/Scripts/EnemyScript.cs" />
      <Compile Include="Assets/Scripts/EnemyMissileScript.cs" />
+     <Compile Include="Assets/Scripts/TestScript.cs" />
      <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
      <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader" />
