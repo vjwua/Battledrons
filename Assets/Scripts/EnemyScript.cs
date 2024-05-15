@@ -14,16 +14,17 @@ public class EnemyScript : MonoBehaviour
     List<int> potentialHits;
     List<int> currentHits;
     private int guess;
-    public GameManager gameManager;
+    GameManager gameManager;
 
     private void Start()
     {
+        gameManager = FindObjectOfType<GameManager>();
         potentialHits = new List<int>();
         currentHits = new List<int>();
         guessGrid = Enumerable.Repeat('o', 100).ToArray();
     }
 
-    public List<int[]> PlaceEnemyDrones()
+    public List<int[]>PlaceEnemyDrones()
     {
         List<int[]> enemyDrones = new List<int[]>
         {
@@ -153,6 +154,7 @@ public class EnemyScript : MonoBehaviour
         tilePosition.y += 25;
         enemyMissilePrefab.transform.position = tilePosition;
         GameObject missile = Instantiate(firePrefab, tilePosition, Quaternion.identity);
+        Debug.Log(guess);
         tile.GetComponentInChildren<TileManager>().SetTarget(guess);
         laserParticle.Play();
     }
@@ -217,6 +219,11 @@ public class EnemyScript : MonoBehaviour
                 }
             }
         }
+        Invoke(nameof(EndTurn), 1.0f);
+    }
+
+    public void PauseAndEnd()
+    {
         Invoke(nameof(EndTurn), 1.0f);
     }
 }

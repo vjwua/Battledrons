@@ -16,6 +16,7 @@ public class TileManager : MonoBehaviour
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
+        enemyScript = FindObjectOfType<EnemyScript>();
         hitColor[0] = gameObject.GetComponent<MeshRenderer>().material.color;
         hitColor[1] = gameObject.GetComponent<MeshRenderer>().material.color;
     }
@@ -60,12 +61,13 @@ public class TileManager : MonoBehaviour
         {
             Debug.Log("Test-2");
             
-            if (other.gameObject.CompareTag("Drone")) {
-                gameManager.EnemyHitPlayer(other.gameObject.transform.position, targetTile, other.gameObject);
-            } 
-            else {
+            // if (other.gameObject.CompareTag("Drone")) {
+            //     gameManager.EnemyHitPlayer(other.gameObject.transform.position, targetTile, other.gameObject);
+            // } 
+            // else {
                 enemyScript.PauseAndEnd(targetTile);
-            }
+                Destroy(gameObject);
+            // }
         }
     }
 
