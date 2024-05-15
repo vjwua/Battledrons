@@ -1,15 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ExitGames.Client.Photon.StructWrapping;
 using UnityEngine;
 
 public class EnemyScript : MonoBehaviour
 {
+    [Header("Objects")]
+    [SerializeField] GameObject enemyMissilePrefab;
+    [SerializeField] GameObject firePrefab;
+
     char[] guessGrid;
     List<int> potentialHits;
     List<int> currentHits;
     private int guess;
-    [SerializeField] GameObject firePrefab;
     public GameManager gameManager;
 
     private void Start()
@@ -77,10 +81,10 @@ public class EnemyScript : MonoBehaviour
             }
             Debug.Log(temp);
         } */
-        foreach (var x in enemyDrones)
+        /*foreach (var x in enemyDrones)
         {
             Debug.Log($"x: {x[0]}");
-        }
+        }*/
         return enemyDrones;
     }
 
@@ -144,9 +148,13 @@ public class EnemyScript : MonoBehaviour
         }
         GameObject tile = GameObject.Find($"({guess / 10}, {guess % 10})");
         guessGrid[guess] = 'm';
-        Vector3 tileVector = tile.transform.position;
-        tile.GetComponent<Rigidbody>().isKinematic = false;
-        GameObject missile = Instantiate(firePrefab, tileVector, Quaternion.identity);
+        ParticleSystem laserParticle = enemyMissilePrefab.GetComponentInChildren<ParticleSystem>();
+        Vector3 tilePosition = tile.transform.position;
+        tilePosition.y += 25;
+        enemyMissilePrefab.transform.position = tilePosition;
+        GameObject missile = Instantiate(firePrefab, tilePosition, Quaternion.identity);
+        tile.GetComponentInChildren<TileManager>().SetTarget(guess);
+        laserParticle.Play();
     }
 
     private static void TileGuess(List<int> hitIndex, List<int> closeTiles, out int index, out int possibleGuess, out bool onGrid)
@@ -209,6 +217,6 @@ public class EnemyScript : MonoBehaviour
                 }
             }
         }
-        Invoke("EndTurn", 1.0f);
+        Invoke(nameof(EndTurn), 1.0f);
     }
 }

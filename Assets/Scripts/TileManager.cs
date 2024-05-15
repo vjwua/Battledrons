@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class TileManager : MonoBehaviour
 {
     GameManager gameManager;
+    EnemyScript enemyScript;
     Ray ray;
     RaycastHit hit;
     private bool missileHit = false;
+    private int targetTile = -1;
     Color[] hitColor = new Color[2];
 
     void Start()
@@ -33,7 +36,7 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision other) {
+    /* private void OnCollisionEnter(Collision other) {
         if(other.gameObject.CompareTag("Missile"))
         {
             missileHit = true;
@@ -43,6 +46,32 @@ public class TileManager : MonoBehaviour
             hitColor[0] = new Color32(38, 57, 76, 255);
             GetComponent<Renderer>().material.color = hitColor[0];
         }
+    } */
+
+    private void OnParticleCollision(GameObject other) {
+        Debug.Log("Particle hit!"); //player
+        if(gameManager.PlayerTurn)
+        {
+            Debug.Log("Test-1");
+            gameManager.CheckHit(other.gameObject);
+            Destroy(gameObject);
+        }
+        else
+        {
+            Debug.Log("Test-2");
+            
+            if (other.gameObject.CompareTag("Drone")) {
+                gameManager.EnemyHitPlayer(other.gameObject.transform.position, targetTile, other.gameObject);
+            } 
+            else {
+                enemyScript.PauseAndEnd(targetTile);
+            }
+        }
+    }
+
+    public void SetTarget(int target)
+    {
+        targetTile = target;
     }
 
     public void SetTileColor(int index, Color32 color)

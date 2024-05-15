@@ -27,8 +27,7 @@ public class DroneScript : MonoBehaviour
     }
     
     private void OnTriggerEnter(Collider other) {
-        //transform.parent.GetComponent<TestScript>().CollisionDetected(this);
-        Debug.Log($"{other.gameObject.name} and {other.gameObject.transform.parent.name}");
+        //Debug.Log($"{other.gameObject.name} and {other.gameObject.transform.parent.name}");
         if(other.gameObject.CompareTag("Tile"))
         {
             touchTiles.Add(other.gameObject);

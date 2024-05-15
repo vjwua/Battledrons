@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public EnemyScript enemyScript;
     private DroneScript drone;
     private List<int[]> enemyDrones;
+    ParticleSystem laserParticle;
     private int droneIndex = 0;
     [SerializeField] List<TileManager> allTileManager;
 
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
 
     private bool setupComplete = false;
     private bool playerTurn = true;
+    public bool PlayerTurn { get { return playerTurn; } }
     private List<GameObject> playerFires = new List<GameObject>();
     private List<GameObject> enemyFires = new List<GameObject>();
 
@@ -99,10 +101,9 @@ public class GameManager : MonoBehaviour
     {
         if (setupComplete && playerTurn)
         {
-            ParticleSystem laserParticle = missilePrefab.GetComponentInChildren<ParticleSystem>();
+            laserParticle = missilePrefab.GetComponentInChildren<ParticleSystem>();
             Vector3 tilePosition = tile.transform.position;
             tilePosition.y += 25;
-            playerTurn = false;
             missilePrefab.transform.position = tilePosition;
             laserParticle.Play();
         }
@@ -123,8 +124,10 @@ public class GameManager : MonoBehaviour
 
     public void CheckHit(GameObject tile)
     {
-        int tileNum = Int32.Parse(Regex.Match(tile.name, @"\d+").Value);
+        playerTurn = false;
         int hitCount = 0;
+        if (Int32.TryParse(tile.name, out int tileNum))
+        {
         foreach(int [] tileNumArray in enemyDrones)
         {
             if(tileNumArray.Contains(tileNum))
@@ -146,22 +149,17 @@ public class GameManager : MonoBehaviour
                     enemyDroneCount--;
                     topDroneText.text = "Fallen";
                     enemyFires.Add(Instantiate(firePrefab, tile.transform.position, Quaternion.identity));
-                    tile.GetComponent<TileManager>().SetTileColor(1, new Color32(68, 0, 0, 255));
-                    tile.GetComponent<TileManager>().SwitchColors(1);
                 }
                 else
                 {
                     topDroneText.text = "Highlighted";
-                    tile.GetComponent<TileManager>().SetTileColor(1, new Color32(255, 0, 0, 255));
-                    tile.GetComponent<TileManager>().SwitchColors(1);
                 }
             }
         }
         Debug.Log("tileNum");
+        }
         if(hitCount == 0)
         {
-            tile.GetComponent<TileManager>().SetTileColor(1, new Color32(38, 57, 76, 255));
-            tile.GetComponent<TileManager>().SwitchColors(1);
             topDroneText.text = "Missed";
         }
         Invoke(nameof(EndPlayerMove), 2.0f);
@@ -198,7 +196,6 @@ public class GameManager : MonoBehaviour
         enemyDroneText.text = enemyDroneCount.ToString();
         topDroneText.text = "Enemy's move";
         enemyScript.NPCTurn();
-        ColorAllTiles(0);
         if (playerDroneCount < 1) GameOver("The enemy wins!");
     }
 
@@ -219,16 +216,7 @@ public class GameManager : MonoBehaviour
         playerDroneText.text = playerDroneCount.ToString();
         topDroneText.text = "Choose a tile to strike";
         playerTurn = true;
-        ColorAllTiles(0);
         if (enemyDroneCount < 1) GameOver("You win!");
-    }
-
-    private void ColorAllTiles(int colorIndex)
-    {
-        foreach (TileManager tileManager in allTileManager)
-        {
-            tileManager.SwitchColors(colorIndex);
-        }
     }
 
     void GameOver(string winner)
